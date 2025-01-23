@@ -27,8 +27,11 @@ class MixViewController: UIViewController {
         
         let attrs = CTFrameParser.attributes(config: config)
         
-        let attrString = NSMutableAttributedString(string: str, attributes: attrs)
-        attrString.addAttribute(NSForegroundColorAttributeName, value: UIColor.red, range: NSRange(location: 0, length: 7))
+        // 转换属性字典的键为 NSAttributedString.Key
+        let convertedAttrs = attrs.mapKeys { NSAttributedString.Key($0.rawValue) }
+        
+        let attrString = NSMutableAttributedString(string: str, attributes: convertedAttrs)
+        attrString.addAttribute(.foregroundColor, value: UIColor.red, range: NSRange(location: 0, length: 7))
         
         let data = CTFrameParser.parse(content: attrString, config: config)
         
@@ -47,4 +50,15 @@ class MixViewController: UIViewController {
         }
     }
 
+}
+
+// 扩展字典来转换键类型
+extension Dictionary {
+    func mapKeys<T>(_ transform: (Key) -> T) -> [T: Value] {
+        var result: [T: Value] = [:]
+        for (key, value) in self {
+            result[transform(key)] = value
+        }
+        return result
+    }
 }

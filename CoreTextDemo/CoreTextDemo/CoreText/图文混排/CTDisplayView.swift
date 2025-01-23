@@ -61,7 +61,7 @@ class CTDisplayView: UIView {
         self.isUserInteractionEnabled = true
     }
     
-    func userTapGestureDetected(recognizer: UITapGestureRecognizer) {
+    @objc func userTapGestureDetected(recognizer: UITapGestureRecognizer) {
         let point = recognizer.location(in: self)
         print("point\(point)")
         if let imageArray = data?.imageArray {
@@ -72,7 +72,7 @@ class CTDisplayView: UIView {
                 imagePosition.y = self.bounds.size.height - imageRect.origin.y - imageRect.size.height
                 let rect = CGRect(x: imagePosition.x, y: imagePosition.y, width: imageRect.size.width, height: imageRect.size.height)
                 if rect.contains(point) {
-                    print("\(imageData.name)")
+                    print("\(String(describing: imageData.name))")
                     
                     imageTapAction?(self, imageData)
                     

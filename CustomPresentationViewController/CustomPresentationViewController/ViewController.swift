@@ -17,7 +17,7 @@ class ViewController: UIViewController {
 
     @IBAction func firstAction(sender: AnyObject) {
         let storyBoard = UIStoryboard(name: "CustomPresentation", bundle: nil)
-        let controller = storyBoard.instantiateViewControllerWithIdentifier("FirstAViewController") as! FirstAViewController
+        let controller = storyBoard.instantiateViewController(withIdentifier: "FirstAViewController") as! FirstAViewController
         navigationController?.pushViewController(controller, animated: true)
     }
 

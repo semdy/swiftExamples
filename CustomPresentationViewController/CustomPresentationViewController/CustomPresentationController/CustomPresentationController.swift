@@ -16,13 +16,13 @@ class CustomPresentationController: UIPresentationController {
         
         
         
-        presentedViewController.transitionCoordinator()?.animateAlongsideTransition({ (context) in
+        presentedViewController.transitionCoordinator?.animate(alongsideTransition: { (context) in
             
             
             }, completion: nil)
     }
     
-    override func presentationTransitionDidEnd(completed: Bool) {
+    override func presentationTransitionDidEnd(_ completed: Bool) {
         print("didEnd")
     }
     
@@ -30,7 +30,7 @@ class CustomPresentationController: UIPresentationController {
         
     }
     
-    override func dismissalTransitionDidEnd(completed: Bool) {
+    override func dismissalTransitionDidEnd(_ completed: Bool) {
         
     }
 }

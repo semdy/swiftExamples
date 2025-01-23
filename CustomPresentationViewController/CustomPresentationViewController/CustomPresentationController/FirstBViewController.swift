@@ -10,7 +10,7 @@ import UIKit
 
 class FirstBViewController: UIViewController {
     
-    override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: NSBundle?) {
+    override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
         super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
         
         setDelegate()
@@ -36,7 +36,7 @@ class FirstBViewController: UIViewController {
     
     func setDelegate() {
         self.transitioningDelegate = self
-        self.modalPresentationStyle = .Custom
+        self.modalPresentationStyle = .custom
     }
     /*
     // MARK: - Navigation
@@ -49,14 +49,14 @@ class FirstBViewController: UIViewController {
     */
 
     @IBAction func dismissAction(sender: AnyObject) {
-        dismissViewControllerAnimated(true, completion: nil)
+        dismiss(animated: true, completion: nil)
     }
 }
 
 extension FirstBViewController: UIViewControllerTransitioningDelegate {
     
     func presentationControllerForPresentedViewController(presented: UIViewController, presentingViewController presenting: UIViewController, sourceViewController source: UIViewController) -> UIPresentationController? {
-        return CustomPresentationController(presentedViewController: presented, presentingViewController: presenting)
+        return CustomPresentationController(presentedViewController: presented, presenting: presenting)
     }
     
     func animationControllerForPresentedController(presented: UIViewController, presentingController presenting: UIViewController, sourceController source: UIViewController) -> UIViewControllerAnimatedTransitioning? {
@@ -66,27 +66,34 @@ extension FirstBViewController: UIViewControllerTransitioningDelegate {
 
 class TransitioningAnimator: NSObject, UIViewControllerAnimatedTransitioning {
     
-    func transitionDuration(transitionContext: UIViewControllerContextTransitioning?) -> NSTimeInterval {
+    func transitionDuration(using transitionContext: UIViewControllerContextTransitioning?) -> TimeInterval {
         return 1.0
     }
     
-    func animateTransition(transitionContext: UIViewControllerContextTransitioning) {
+    func animateTransition(using transitionContext: UIViewControllerContextTransitioning) {
         guard
-            let toViewController = transitionContext.viewControllerForKey(UITransitionContextToViewControllerKey),
-            let toView = transitionContext.viewForKey(UITransitionContextToViewKey),
-            let containerView = transitionContext.containerView()
+            let toViewController = transitionContext.viewController(forKey: .to), // 修复了 key
+            let toView = transitionContext.view(forKey: .to) // 修复了 key
         else {
             return
         }
         
-        let fi = transitionContext.finalFrameForViewController(toViewController)
-        toView.frame.origin.x = fi.width
+        let containerView = transitionContext.containerView
+        
+        // 获取最终的 frame
+        let finalFrame = transitionContext.finalFrame(for: toViewController)
+        
+        // 设置目标视图的初始位置
+        toView.frame.origin.x = finalFrame.width
         containerView.addSubview(toView)
         
-        UIView.animateWithDuration(transitionDuration(transitionContext), animations: {
+        // 动画设置
+        UIView.animate(withDuration: transitionDuration(using: transitionContext), animations: {
             toView.frame.origin.x = 0
-            }) { completed in
-                transitionContext.completeTransition(completed)
+        }) { completed in
+            // 完成动画后通知 transitionContext 完成
+            transitionContext.completeTransition(completed)
         }
     }
 }
+

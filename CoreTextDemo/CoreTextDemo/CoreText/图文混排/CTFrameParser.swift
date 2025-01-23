@@ -84,29 +84,33 @@ class CTFrameParser: NSObject {
     ///
     /// - Parameter config: 配置信息
     /// - Returns: 文字基本属性
-    class func attributes(config: CTFrameParserConfig) -> [String: Any] {
+    class func attributes(config: CTFrameParserConfig) -> [NSAttributedString.Key: Any] {
         // 字体大小
         let fontSize = config.fontSize
         let uiFont = UIFont.systemFont(ofSize: fontSize)
-        let ctFont = CTFontCreateWithName(uiFont.fontName as CFString?, fontSize, nil)
+        let ctFont = CTFontCreateWithName(uiFont.fontName as CFString, fontSize, nil)
         // 字体颜色
         let textColor = config.textColor
         
         // 行间距
-        var lineSpacing = config.lineSpace
+        let lineSpacing = config.lineSpace
+//        let lineSpacingPointer = UnsafeMutablePointer(&lineSpacing)
+        // 创建一个有效的 UnsafeMutablePointer
+        let lineSpacingPointer = UnsafeMutablePointer<CGFloat>.allocate(capacity: 1)
+        lineSpacingPointer.pointee = lineSpacing
         
         let settings = [
-            CTParagraphStyleSetting(spec: .lineSpacingAdjustment, valueSize: MemoryLayout<CGFloat>.size, value: &lineSpacing),
-            CTParagraphStyleSetting(spec: .maximumLineSpacing, valueSize: MemoryLayout<CGFloat>.size, value: &lineSpacing),
-            CTParagraphStyleSetting(spec: .minimumLineSpacing, valueSize: MemoryLayout<CGFloat>.size, value: &lineSpacing)
+            CTParagraphStyleSetting(spec: .lineSpacingAdjustment, valueSize: MemoryLayout<CGFloat>.size, value: lineSpacingPointer),
+            CTParagraphStyleSetting(spec: .maximumLineSpacing, valueSize: MemoryLayout<CGFloat>.size, value: lineSpacingPointer),
+            CTParagraphStyleSetting(spec: .minimumLineSpacing, valueSize: MemoryLayout<CGFloat>.size, value: lineSpacingPointer)
         ]
         let paragraphStyle = CTParagraphStyleCreate(settings, settings.count)
         
         // 封装
-        let dict: [String: Any] = [
-            NSForegroundColorAttributeName: textColor,
-            NSFontAttributeName: ctFont,
-            NSParagraphStyleAttributeName: paragraphStyle
+        let dict: [NSAttributedString.Key: Any] = [
+            .foregroundColor: textColor,
+            .font: ctFont as Any,
+            .paragraphStyle: paragraphStyle as Any
         ]
         
         return dict
@@ -184,7 +188,7 @@ class CTFrameParser: NSObject {
         
         // 设置文字颜色
         if let colorValue = dict["color"] {
-            attributes[NSForegroundColorAttributeName] = UIColor(hexString: colorValue)
+            attributes[.foregroundColor] = UIColor(hexString: colorValue)
         }
         
         // 设置文字大小
@@ -193,7 +197,7 @@ class CTFrameParser: NSObject {
             if let n = NumberFormatter().number(from: sizeValue) {
                 
                 if n.intValue > 0 {
-                    attributes[NSFontAttributeName] = UIFont.systemFont(ofSize: CGFloat(n))
+                    attributes[.font] = UIFont.systemFont(ofSize: CGFloat(truncating: n))
                 }
             }
         }
